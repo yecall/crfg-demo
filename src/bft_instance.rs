@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::message::MessageEnv;
+use crate::message::BftMsgPkg;
 
 #[derive(Default, Debug)]
 pub struct Index{
@@ -19,12 +19,12 @@ pub enum BftMsgType{
 #[derive(Debug)]
 pub struct BftInstance{
     phase: BftMsgType,
-    pre_prepare: MessageEnv, 
-    prepares: Vec<MessageEnv>,
-    commits: Vec<MessageEnv>,
+    pre_prepare: BftMsgPkg, 
+    prepares: Vec<BftMsgPkg>,
+    commits: Vec<BftMsgPkg>,
 }
 
 impl BftInstance{
-    pub fn new() -> BftInstance{ BftInstance{phase: BftMsgType::BftNone, pre_prepare: MessageEnv::new(), prepares: vec![], commits: vec![]} }
+    pub fn new() -> BftInstance{ BftInstance{phase: BftMsgType::BftNone, pre_prepare: BftMsgPkg::new(), prepares: vec![], commits: vec![]} }
 }
 

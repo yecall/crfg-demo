@@ -1,13 +1,14 @@
 //extern crate crossbeam;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
-extern crate serde_json;
-extern crate rand;
-extern crate ed25519_dalek;
+//extern crate serde;
+//extern crate serde_json;
+//extern crate rand;
+//extern crate ed25519_dalek;
 
 mod message;
 mod bft_instance;
+mod bft;
 mod hashing;
 
 use std::env;
@@ -25,6 +26,7 @@ use crate::hashing::blake2_256;
 use crate::message::BftMsg;
 use crate::message::BftMsgPkg;
 use crate::bft_instance::BftInstance;
+use crate::bft::Bft;
 
 pub type Hash = primitive_types::H256;
 
@@ -49,7 +51,7 @@ fn main(){
         Ok(value) => println!("verify succeed: {:?}", value),
         Err(error) => println!("verify error: {}", error)
     }
-    
+
     let q = ArrayQueue::new(2);
     assert_eq!(q.push('a'), Ok(()));
 }

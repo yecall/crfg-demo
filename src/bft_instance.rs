@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use crate::message::BftMsgPkg;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq, Hash)]
 pub struct Index{
     view_number: i64,
     sequence: i64,

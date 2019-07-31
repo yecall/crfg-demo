@@ -38,10 +38,15 @@ pub struct ViewChangeBasic {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct ViewChange {
-    pub view_change: Box<BftMsgPkg>, //BftMsgPkg::ViewChange
+pub struct PreparedSet {
     pub pre_prepare: Box<BftMsgPkg>, //BftMsgPkg::PrePrePare
     pub prepares: Vec<Box<BftMsgPkg>>,//BftMsgPkg::PrePare
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct ViewChange {
+    pub view_change: Box<BftMsgPkg>, //BftMsgPkg::ViewChange
+    pub prepared_set: PreparedSet,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -50,7 +55,7 @@ pub struct NewView{
     pub sequence: i64,
     pub replica_id:i8,
     pub pre_prepare: Box<BftMsgPkg>, //BftMsgPkg::PrePrePare
-    pub view_changes: Vec<Box<BftMsgPkg>>, //BftMsgPkg::ViewChange
+    pub view_changes: Vec<Box<BftMsgPkg>>, //BftMsgPkg::ViewChangeBasic
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -128,7 +133,10 @@ fn test_serialize_message_env(){
         pre_prepare: Box::new(BftMsgPkg{
             round_number: 5,
             message: BftMsg::NullMsg,
-            signature: String::from("signature for pre_prepare")
+            signature: BftSignature{
+                public_key: String::from("public key."),
+                sign_data: String::from("signature.")
+            }
         }),
         view_changes: vec![
             Box::new(BftMsgPkg{
@@ -136,10 +144,18 @@ fn test_serialize_message_env(){
                 message: BftMsg::Commit(Commit{
                     view_number: 10, sequence: 100, replica_id:3, proposal_hash: String::from("commit hash")
                 }),
-                signature: String::from("signature for new_view1")
+                signature: BftSignature{
+                    public_key: String::from("public key."),
+                    sign_data: String::from("signature.")
+                }
             }),
             Box::new(BftMsgPkg{
-                round_number: 6, message: BftMsg::NullMsg, signature: String::from("signature for new_view2")
+                round_number: 6,
+                message: BftMsg::NullMsg,
+                signature: BftSignature{
+                    public_key: String::from("public key."),
+                    sign_data: String::from("signature.")
+                }
             })
         ],
     });

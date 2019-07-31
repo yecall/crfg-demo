@@ -10,6 +10,7 @@ mod message;
 mod bft_instance;
 mod bft;
 mod hashing;
+mod view_change_instance;
 
 use std::env;
 use std::thread;
@@ -27,16 +28,17 @@ use crate::message::BftMsg;
 use crate::message::BftMsgPkg;
 use crate::bft_instance::BftInstance;
 use crate::bft::Bft;
+use crate::view_change_instance::ViewChangeInstance;
 
 pub type Hash = primitive_types::H256;
 
 fn main(){
     let args: Vec<String> = env::args().collect();
-    let bft_msg =BftMsgPkg::new();
-    let instance = BftInstance::new();
+    //let bft_msg =BftMsgPkg::new();
+    //let instance = BftInstance::new();
 
-    println!("bft_msg = {:#?}", bft_msg);
-    println!("instance = {:#?}", instance);
+    //println!("bft_msg = {:#?}", bft_msg);
+    //println!("instance = {:#?}", instance);
 
     //hash practise
     let s = String::from("werqweqwe");

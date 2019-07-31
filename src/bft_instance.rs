@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::message::BftMsgPkg;
+use crate::message::{BftMsgPkg, PrePrePare, Commit};
 
 #[derive(Default, Debug, PartialEq, Eq, Hash)]
 pub struct Index{
@@ -9,22 +9,23 @@ pub struct Index{
 
 #[derive(Debug)]
 pub enum BftMsgType{
-    BftNone,
     BftPrePrePared,
     BftPrepared,
     BftCommited,
-    BftMax,
+    BftNone,
 }
 
 #[derive(Debug)]
 pub struct BftInstance{
     phase: BftMsgType,
-    pre_prepare: BftMsgPkg, 
-    prepares: Vec<BftMsgPkg>,
-    commits: Vec<BftMsgPkg>,
+    pre_prepare: PrePrePare,
+    prepares: HashMap<i8, PrePrePare>,
+    commits: HashMap<i8, Commit>,
+
+    //in case of view change
+    pre_prepare_pkg: BftMsgPkg,
+    prepares_pkgs: Vec<BftMsgPkg>,
+    commits_pkgs: Vec<BftMsgPkg>,
 }
 
-impl BftInstance{
-    pub fn new() -> BftInstance{ BftInstance{phase: BftMsgType::BftNone, pre_prepare: BftMsgPkg::new(), prepares: vec![], commits: vec![]} }
-}
 

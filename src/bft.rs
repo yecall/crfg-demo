@@ -3,6 +3,7 @@ use crate::message::*;
 use crate::bft_instance::*;
 use ed25519_dalek::Signature;
 use ed25519_dalek::PublicKey;
+use crate::hashing::blake2_256;
 
 #[derive(Debug)]
 pub struct Bft{
@@ -10,6 +11,7 @@ pub struct Bft{
     private_key: String,
     replica_id: i8,
     view_number: i64,
+    view_active: bool,
     sequence: i64,
     last_exe_seq: i64,
     validators: HashMap<String, i8>,
@@ -57,10 +59,13 @@ impl Bft{
         true
     }
 
-    fn proposal_valid(proposal: &str) -> bool {
-        //check block size (in limit)
-        //check if transaction is legal
+    fn proposal_valid(proposal: &[u8]) -> bool {
+        //check block header legality
         true
+    }
+
+    fn create_bft_instance(&mut self, msg_pkg: BftMsgPkg){
+
     }
 
     fn set_bft_instance(msg_pkg: &BftMsgPkg){
@@ -82,6 +87,15 @@ impl Bft{
         //let sig = msg_pkg.signature();
         //sig.public_key.verify(msg_pkg.message().serialize(), sig.sign_data);
         true
+    }
+
+    fn digest_valid(data: &[u8], digest: &[u8]) -> bool {
+        if blake2_256(data) == digest {
+            true
+        }
+        else{
+            false
+        }
     }
 
     fn replica_id_valid(&self, public_key: &str, replica_id: i8) -> bool {
@@ -111,12 +125,29 @@ impl Bft{
 
     fn send_new_view(&mut self){}
 
-    fn process_pre_prepare(&mut self, msg_pkg: BftMsgPkg){
+    fn process_pre_prepare(&mut self, msg_pkg: BftMsgPkg) -> bool {
         //check proposal digest
-        //check proposal value
+        match msg_pkg.message() {
+           BftMsg::PrePrePare(pre_prepare) => {
+               let proposal = BftMsg::serialize(msg_pkg.message());
+               if !Self::digest_valid(proposal.as_bytes(), pre_prepare.proposal_hash.as_bytes()) {
+                   return  false;
+               }
+
+               //check proposal value
+               if !Self::proposal_valid(proposal.as_bytes()) {
+                   return false;
+               }
+           },
+           _ => (),
+        }
+
         //update bft instance
+        self.create_bft_instance(msg_pkg);
+
         //create prepare msg
         //send prepare msg
+        true
     }
 
     fn process_prepare(&mut self, msg_pkg: BftMsgPkg){

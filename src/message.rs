@@ -1,10 +1,10 @@
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct BftSignature {
     pub public_key: String,
     pub sign_data: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PrePrePare{
     pub view_number: i64,
     pub sequence: i64,
@@ -13,7 +13,7 @@ pub struct PrePrePare{
     pub proposal_hash: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PrePare{
     pub view_number: i64,
     pub sequence: i64,
@@ -21,7 +21,7 @@ pub struct PrePare{
     pub proposal_hash: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Commit{
     pub view_number: i64,
     pub sequence: i64,
@@ -29,7 +29,7 @@ pub struct Commit{
     pub proposal_hash: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ViewChangeBasic {
     pub view_number: i64,
     pub sequence: i64,
@@ -37,19 +37,19 @@ pub struct ViewChangeBasic {
     pub proposal_hash: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PreparedSet {
     pub pre_prepare: Box<BftMsgPkg>, //BftMsgPkg::PrePrePare
     pub prepares: Vec<Box<BftMsgPkg>>,//BftMsgPkg::PrePare
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ViewChange {
     pub view_change: Box<BftMsgPkg>, //BftMsgPkg::ViewChange
     pub prepared_set: PreparedSet,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct NewView{
     pub view_number: i64,
     pub sequence: i64,
@@ -58,7 +58,7 @@ pub struct NewView{
     pub view_changes: Vec<Box<BftMsgPkg>>, //BftMsgPkg::ViewChangeBasic
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum BftMsg{
     NullMsg,
     PrePrePare(PrePrePare),
@@ -79,7 +79,7 @@ impl BftMsg{
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct BftMsgPkg{
     round_number: i64,
     message: BftMsg,

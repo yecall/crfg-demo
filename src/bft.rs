@@ -1,9 +1,11 @@
-use std::collections::HashMap;
 use crate::message::*;
 use crate::bft_instance::*;
+use crate::hashing::blake2_256;
+use crate::view_change_instance::*;
+
 use ed25519_dalek::Signature;
 use ed25519_dalek::PublicKey;
-use crate::hashing::blake2_256;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Bft{
@@ -15,7 +17,12 @@ pub struct Bft{
     sequence: i64,
     last_exe_seq: i64,
     validators: HashMap<String, i8>,
-    instances: HashMap<Index, BftInstance>,
+    instances: HashMap<BftInstanceIndex, BftInstance>,
+    ckp_interval: i64,
+    low_water_mark: i64,
+
+    vc_instances: HashMap<ViewChangeIndex, ViewChangeInstance>,
+    last_check_time: i64,
 }
 
 impl Bft{
@@ -64,8 +71,23 @@ impl Bft{
         true
     }
 
-    fn create_bft_instance(&mut self, msg_pkg: BftMsgPkg){
+    fn create_bft_instance(&mut self, msg: PrePrePare, msg_pkg: BftMsgPkg){
+        let index = BftInstanceIndex {
+            sequence: msg.sequence,
+            view_number: msg.view_number
+        };
 
+        let instance = BftInstance{
+            phase: BftMsgType::BftPrePrePared,
+            pre_prepare: msg,
+            prepares: HashMap::new(),
+            commits: HashMap::new(),
+            pre_prepare_pkg: msg_pkg,
+            prepares_pkgs: vec![],
+            commits_pkgs: vec![],
+        };
+
+        self.instances.insert(index, instance);
     }
 
     fn set_bft_instance(msg_pkg: &BftMsgPkg){
@@ -131,19 +153,18 @@ impl Bft{
            BftMsg::PrePrePare(pre_prepare) => {
                let proposal = BftMsg::serialize(msg_pkg.message());
                if !Self::digest_valid(proposal.as_bytes(), pre_prepare.proposal_hash.as_bytes()) {
-                   return  false;
+                   return false;
                }
 
-               //check proposal value
                if !Self::proposal_valid(proposal.as_bytes()) {
                    return false;
                }
+
+               self.create_bft_instance(pre_prepare.clone(), msg_pkg);
            },
            _ => (),
         }
 
-        //update bft instance
-        self.create_bft_instance(msg_pkg);
 
         //create prepare msg
         //send prepare msg
@@ -162,6 +183,14 @@ impl Bft{
     }
 
     fn process_new_view(&mut self, msg_pkg: BftMsgPkg){
+    }
+
+    fn update_validators(&mut self, validators: Vec<String>){
+        let mut id = 0;
+        for val in validators.into_iter(){
+            self.validators.insert(val, id);
+            id += 1;
+        }
     }
 }
 

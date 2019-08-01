@@ -37,29 +37,29 @@ impl Bft{
         match pkg.message() {
             BftMsg::PrePrePare(msg) =>{
                 self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
-                self.process_pre_prepare(pkg);
+                self.process_pre_prepare(msg.clone(), pkg);
             },
             BftMsg::PrePare(msg) => {
                 self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
-                self.process_prepare(pkg);
+                self.process_prepare(msg.clone(), pkg);
             },
             BftMsg::Commit(msg) => {
                 self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
-                self.process_commit(pkg);
+                self.process_commit(msg.clone(), pkg);
             },
             BftMsg::ViewChange(msg) => {
                 let view_change_basic = msg.view_change.message();
                 match msg.view_change.message() {
                     BftMsg::ViewChangeBasic(basic) =>{
                         self.replica_id_valid(&pkg.signature().public_key, basic.replica_id);
+                        self.process_view_change(msg.clone(), basic.clone(), pkg);
                     },
                     _ => (),
                 };
-                self.process_view_change(pkg);
             },
             BftMsg::NewView(msg) => {
                 self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
-                self.process_new_view(pkg);
+                self.process_new_view(msg.clone(), pkg);
             },
             _ => println!("Undefined bft message type.")
         }
@@ -88,6 +88,8 @@ impl Bft{
         };
 
         self.instances.insert(index, instance);
+
+        //delete useless instance
     }
 
     fn set_bft_instance(msg_pkg: &BftMsgPkg){
@@ -147,23 +149,18 @@ impl Bft{
 
     fn send_new_view(&mut self){}
 
-    fn process_pre_prepare(&mut self, msg_pkg: BftMsgPkg) -> bool {
+    fn process_pre_prepare(&mut self, msg: PrePrePare, msg_pkg: BftMsgPkg) -> bool {
         //check proposal digest
-        match msg_pkg.message() {
-           BftMsg::PrePrePare(pre_prepare) => {
-               let proposal = BftMsg::serialize(msg_pkg.message());
-               if !Self::digest_valid(proposal.as_bytes(), pre_prepare.proposal_hash.as_bytes()) {
-                   return false;
-               }
-
-               if !Self::proposal_valid(proposal.as_bytes()) {
-                   return false;
-               }
-
-               self.create_bft_instance(pre_prepare.clone(), msg_pkg);
-           },
-           _ => (),
+        let proposal = BftMsg::serialize(msg_pkg.message());
+        if !Self::digest_valid(proposal.as_bytes(), msg.proposal_hash.as_bytes()) {
+            return false;
         }
+
+        if !Self::proposal_valid(proposal.as_bytes()) {
+            return false;
+        }
+
+        self.create_bft_instance(msg, msg_pkg);
 
 
         //create prepare msg
@@ -171,18 +168,18 @@ impl Bft{
         true
     }
 
-    fn process_prepare(&mut self, msg_pkg: BftMsgPkg){
+    fn process_prepare(&mut self, msg: PrePare, msg_pkg: BftMsgPkg){
         //check prepare proposal digest == preprepare proposal digest
     }
 
-    fn process_commit(&mut self, msg_pkg: BftMsgPkg){
+    fn process_commit(&mut self, msg: Commit, msg_pkg: BftMsgPkg){
     }
 
-    fn process_view_change(&mut self, msg_pkg: BftMsgPkg){
+    fn process_view_change(&mut self, msg: ViewChange, basic: ViewChangeBasic, msg_pkg: BftMsgPkg){
 
     }
 
-    fn process_new_view(&mut self, msg_pkg: BftMsgPkg){
+    fn process_new_view(&mut self, msg: NewView, msg_pkg: BftMsgPkg){
     }
 
     fn update_validators(&mut self, validators: Vec<String>){

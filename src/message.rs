@@ -8,9 +8,21 @@ pub struct BftSignature {
 pub struct PrePrePare{
     pub view_number: i64,
     pub sequence: i64,
-    pub replica_id:i8,
+    pub replica_id: i8,
     pub proposal: String,
     pub proposal_hash: String,
+}
+
+impl PrePrePare{
+    pub fn new() -> PrePrePare{
+        PrePrePare{
+            view_number: 0,
+            sequence: 1,
+            replica_id: -1,
+            proposal: String::new(),
+            proposal_hash: String::new(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -21,12 +33,34 @@ pub struct PrePare{
     pub proposal_hash: String,
 }
 
+impl PrePare{
+    pub fn new() -> PrePare{
+        PrePare{
+            view_number: 0,
+            sequence: 1,
+            replica_id: -1,
+            proposal_hash: String::new(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Commit{
     pub view_number: i64,
     pub sequence: i64,
     pub replica_id:i8,
     pub proposal_hash: String,
+}
+
+impl Commit{
+    pub fn new() -> Commit{
+        Commit{
+            view_number: 0,
+            sequence: 1,
+            replica_id: -1,
+            proposal_hash: String::new(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -37,16 +71,45 @@ pub struct ViewChangeBasic {
     pub proposal_hash: String,
 }
 
+impl ViewChangeBasic{
+    pub fn new() -> ViewChangeBasic{
+        ViewChangeBasic{
+            view_number: 0,
+            sequence: 1,
+            replica_id: -1,
+            proposal_hash: String::new(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PreparedSet {
     pub pre_prepare: Box<BftMsgPkg>, //BftMsgPkg::PrePrePare
     pub prepares: Vec<Box<BftMsgPkg>>,//BftMsgPkg::PrePare
 }
 
+impl PreparedSet{
+    pub fn new() -> PreparedSet{
+        PreparedSet{
+            pre_prepare: Box::new(BftMsgPkg::new()),
+            prepares: Vec::new()
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ViewChange {
     pub view_change: Box<BftMsgPkg>, //BftMsgPkg::ViewChange
     pub prepared_set: PreparedSet,
+}
+
+impl ViewChange{
+    pub fn new() -> ViewChange{
+        ViewChange{
+            view_change: Box::new(BftMsgPkg::new()),
+            prepared_set: PreparedSet::new()
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -56,6 +119,18 @@ pub struct NewView{
     pub replica_id:i8,
     pub pre_prepare: Box<BftMsgPkg>, //BftMsgPkg::PrePrePare
     pub view_changes: Vec<Box<BftMsgPkg>>, //BftMsgPkg::ViewChangeBasic
+}
+
+impl NewView{
+    pub fn new() -> NewView{
+        NewView{
+            view_number: 0,
+            sequence: 1,
+            replica_id: -1,
+            pre_prepare: Box::new(BftMsgPkg::new()),
+            view_changes: Vec::new()
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -73,7 +148,6 @@ impl BftMsg{
     pub fn serialize(msg: &BftMsg) -> String {
         serde_json::to_string(msg).unwrap()
     }
-
     pub fn deserialize(msg_str: &str) -> BftMsg{
         serde_json::from_str(msg_str).unwrap()
     }
@@ -91,7 +165,8 @@ impl BftMsgPkg{
         BftMsgPkg{
             round_number: -1,
             message: BftMsg::NullMsg,
-            signature: BftSignature{public_key: String::from(""),sign_data: Default::default()}}
+            signature: BftSignature{public_key: String::from(""),sign_data: Default::default()}
+        }
     }
 
     pub fn set_round_number(&mut self, num: i64){ self.round_number = num;}

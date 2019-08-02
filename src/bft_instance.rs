@@ -7,6 +7,15 @@ pub struct BftInstanceIndex {
     pub view_number: i64,
 }
 
+impl BftInstanceIndex{
+    pub fn new() -> BftInstanceIndex{
+        BftInstanceIndex{
+            sequence: 0,
+            view_number: 0,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum BftMsgType{
     BftPrePrePared,
@@ -26,4 +35,18 @@ pub struct BftInstance{
     pub pre_prepare_pkg: BftMsgPkg,
     pub prepares_pkgs: Vec<BftMsgPkg>,
     pub commits_pkgs: Vec<BftMsgPkg>,
+}
+
+impl BftInstance{
+    pub fn new() -> BftInstance{
+        BftInstance{
+            phase: BftMsgType::BftNone,
+            pre_prepare: PrePrePare::new(),
+            prepares: HashMap::new(),
+            commits: HashMap::new(),
+            pre_prepare_pkg: BftMsgPkg::new(),
+            prepares_pkgs: vec![],
+            commits_pkgs: vec![],
+        }
+    }
 }

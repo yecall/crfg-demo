@@ -9,23 +9,41 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Bft{
-    is_validator: bool,
-    private_key: String,
-    replica_id: i8,
-    view_number: i64,
-    view_active: bool,
-    sequence: i64,
-    last_exe_seq: i64,
-    validators: HashMap<String, i8>,
-    instances: HashMap<BftInstanceIndex, BftInstance>,
-    ckp_interval: i64,
-    low_water_mark: i64,
+    pub is_validator: bool,
+    pub private_key: String,
+    pub replica_id: i8,
+    pub view_number: i64,
+    pub view_active: bool,
+    pub sequence: i64,
+    pub last_exe_seq: i64,
+    pub validators: HashMap<String, i8>,
+    pub instances: HashMap<BftInstanceIndex, BftInstance>,
+    pub ckp_interval: i64,
+    pub low_water_mark: i64,
 
-    vc_instances: HashMap<ViewChangeIndex, ViewChangeInstance>,
-    last_check_time: i64,
+    pub vc_instances: HashMap<ViewChangeIndex, ViewChangeInstance>,
+    pub last_check_time: i64,
 }
 
 impl Bft{
+    pub fn new() -> Bft {
+        Bft{
+            is_validator: false,
+            private_key: String::new(),
+            replica_id: -1,
+            view_number: 0,
+            view_active: true,
+            sequence: 0,
+            last_exe_seq: 0,
+            validators: HashMap::new(),
+            instances: HashMap::new(),
+            ckp_interval: 5,
+            low_water_mark: 0,
+            vc_instances: HashMap::new(),
+            last_check_time: 0,
+        }
+    }
+
     fn send() -> bool {
         true
     }
@@ -36,29 +54,24 @@ impl Bft{
 
         match pkg.message() {
             BftMsg::PrePrePare(msg) =>{
-                self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
                 self.process_pre_prepare(msg.clone(), pkg);
             },
             BftMsg::PrePare(msg) => {
-                self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
                 self.process_prepare(msg.clone(), pkg);
             },
             BftMsg::Commit(msg) => {
-                self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
                 self.process_commit(msg.clone(), pkg);
             },
             BftMsg::ViewChange(msg) => {
                 let view_change_basic = msg.view_change.message();
                 match msg.view_change.message() {
                     BftMsg::ViewChangeBasic(basic) =>{
-                        self.replica_id_valid(&pkg.signature().public_key, basic.replica_id);
                         self.process_view_change(msg.clone(), basic.clone(), pkg);
                     },
                     _ => (),
                 };
             },
             BftMsg::NewView(msg) => {
-                self.replica_id_valid(&pkg.signature().public_key, msg.replica_id);
                 self.process_new_view(msg.clone(), pkg);
             },
             _ => println!("Undefined bft message type.")
@@ -150,7 +163,8 @@ impl Bft{
     fn send_new_view(&mut self){}
 
     fn process_pre_prepare(&mut self, msg: PrePrePare, msg_pkg: BftMsgPkg) -> bool {
-        //check proposal digest
+        self.replica_id_valid(&msg_pkg.signature().public_key, msg.replica_id);
+
         let proposal = BftMsg::serialize(msg_pkg.message());
         if !Self::digest_valid(proposal.as_bytes(), msg.proposal_hash.as_bytes()) {
             return false;
@@ -169,17 +183,21 @@ impl Bft{
     }
 
     fn process_prepare(&mut self, msg: PrePare, msg_pkg: BftMsgPkg){
+        self.replica_id_valid(&msg_pkg.signature().public_key, msg.replica_id);
         //check prepare proposal digest == preprepare proposal digest
     }
 
     fn process_commit(&mut self, msg: Commit, msg_pkg: BftMsgPkg){
+        self.replica_id_valid(&msg_pkg.signature().public_key, msg.replica_id);
     }
 
     fn process_view_change(&mut self, msg: ViewChange, basic: ViewChangeBasic, msg_pkg: BftMsgPkg){
+        self.replica_id_valid(&msg_pkg.signature().public_key, basic.replica_id);
 
     }
 
     fn process_new_view(&mut self, msg: NewView, msg_pkg: BftMsgPkg){
+        self.replica_id_valid(&msg_pkg.signature().public_key, msg.replica_id);
     }
 
     fn update_validators(&mut self, validators: Vec<String>){
@@ -188,6 +206,8 @@ impl Bft{
             self.validators.insert(val, id);
             id += 1;
         }
+
+        self.view_number += 1
     }
 }
 
